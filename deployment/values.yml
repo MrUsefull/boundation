@@ -1,0 +1,50 @@
+# create the helm values file
+provider: webhook
+
+dryRun: false
+policy: sync
+
+external-dns:
+  imagePullSecrets:
+    - name: regcred
+
+global:
+  imagePullSecrets:
+    - regcred
+
+image:
+  pullSecrets:
+    - regcred
+
+extraArgs:
+  webhook-provider-url: http://localhost:8080
+
+sidecars:
+  - name: unbound-webhook
+    image: SET_ME_LATER
+    imagePullSecrets:
+      - name: regcred
+    ports:
+      - containerPort: 8080
+        name: http
+    livenessProbe:
+      httpGet:
+        path: /healthz
+        port: http
+      initialDelaySeconds: 10
+      timeoutSeconds: 5
+    readinessProbe:
+      httpGet:
+        path: /healthz
+        port: http
+      initialDelaySeconds: 10
+      timeoutSeconds: 5
+    env:
+      - name: OPNSENSE_CREDS
+        value: /x7sm9GKPg3wOx40+s2MyFrE6IxHez/apP7P5PFIa/OJyVfGyxHJCIeKuDa0bJF4YE8Lx5r/UyWRnGBC:ajiQwJaJCcDMF1U4J5h4ZxpXQg/XRsN4N+zAiLRu+y++x6HJtnYHxUysvGejnDQagQozZ96wjx37/BSd
+        #valueFrom:
+        #  secretKeyRef:
+        #    name: opnsenseapi
+        #    key: opnsense_secret
+      - name: OPNSENSE_BASEURL
+        value: some.host.here
